@@ -1,0 +1,136 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    container_name: omnicare_postgres
+    environment:
+      POSTGRES_DB: omnicare
+      POSTGRES_USER: omnicare
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-omnicare_dev}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./infrastructure/docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U omnicare"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - omnicare_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: omnicare_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - omnicare_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: omnicare_backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://omnicare:${DB_PASSWORD:-omnicare_dev}@postgres:5432/omnicare
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-dev_secret_key_change_in_prod}
+      MODEL_PATH: /app/ml_pipeline/models
+      ENVIRONMENT: development
+    volumes:
+      - ./backend:/app
+      - ./ml_pipeline/models:/app/ml_pipeline/models:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - omnicare_network
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: omnicare_prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - omnicare_network
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: omnicare_grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/monitoring/grafana/provisioning/datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml
+    depends_on:
+      - prometheus
+    networks:
+      - omnicare_network
+
+  admin-dashboard:
+    build:
+      context: ./frontend/admin-dashboard
+      dockerfile: Dockerfile
+    container_name: omnicare_admin_dashboard
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000
+    volumes:
+      - ./frontend/admin-dashboard:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - omnicare_network
+
+  family-portal:
+    build:
+      context: ./frontend/family-portal
+      dockerfile: Dockerfile
+    container_name: omnicare_family_portal
+    ports:
+      - "3002:3000"
+    environment:
+      VITE_API_URL: http://localhost:8000
+    volumes:
+      - ./frontend/family-portal:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - omnicare_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  omnicare_network:
+    driver: bridge

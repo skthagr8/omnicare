@@ -1,0 +1,9 @@
+-r base.txt
+black==23.11.0
+isort==5.12.0
+flake8==6.1.0
+mypy==1.7.1
+pre-commit==3.5.0
+ipython==8.17.2
+ipdb==0.13.13
+watchfiles==0.21.0
