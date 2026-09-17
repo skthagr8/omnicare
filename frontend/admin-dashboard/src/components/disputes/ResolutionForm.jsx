@@ -1,0 +1,7 @@
+'use client';
+
+import { CheckCircle2, HeartHandshake, Paperclip } from 'lucide-react';
+
+export default function ResolutionForm() {
+  return <div className="border-t border-slate-100 px-8 py-5"><p className="mb-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Final Mediation Resolution Note</p><div className="relative"><textarea rows={3} placeholder="Enter a calm, neutral summary of the agreed resolution path..." className="w-full resize-none rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-3 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-[#0F6B72] focus:bg-white" /><Paperclip className="absolute bottom-3 right-3 h-4 w-4 text-slate-400" /></div><div className="mt-3 flex items-center justify-between"><div className="flex items-center gap-2 text-[11px] text-slate-400"><HeartHandshake className="h-3.5 w-3.5 text-[#0F6B72]" /><div><p className="font-semibold text-slate-500">Mediation Protocol</p><p>Standard dispute resolution active</p></div></div><div className="flex gap-2"><button className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Add Addendum</button><button className="flex items-center gap-1.5 rounded-lg bg-[#1B2733] px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-[#0F6B72]"><CheckCircle2 className="h-3.5 w-3.5" />Mark Resolved</button></div></div></div>;
+}

@@ -18,7 +18,7 @@ import {
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Patients', href: '/patients', icon: Users },
-  { label: 'Intake', href: '/intake', icon: UserPlus },
+  { label: 'Intake', href: '/intake/step-1', icon: UserPlus },
   { label: 'Scheduling', href: '/scheduling', icon: CalendarClock },
   { label: 'Resource Mgmt', href: '/resource-mgmt', icon: Boxes },
   { label: 'Risk Panel', href: '/risk-panel', icon: ShieldAlert },

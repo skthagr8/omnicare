@@ -1,0 +1,7 @@
+'use client';
+
+import { CheckCircle2, LockKeyhole } from 'lucide-react';
+
+export default function ReviewAttestation({ accepted, onAccepted }) {
+  return <section className="rounded-xl border border-slate-200 bg-white p-5"><div className="flex items-start gap-3"><span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal-50 text-[#0F6B72]"><LockKeyhole className="h-4 w-4" /></span><div><h2 className="text-xs font-bold uppercase tracking-wide text-slate-600">HIPAA &amp; Clinical Attestation</h2><p className="mt-1 text-[11px] leading-relaxed text-slate-500">By submitting this form, you affirm that the information provided is accurate to the best of your knowledge and has been collected in accordance with HIPAA privacy standards and facility-specific protocol.</p></div></div><label className="mt-4 flex cursor-pointer items-center gap-2 text-xs text-slate-600"><input type="checkbox" checked={accepted} onChange={(event) => onAccepted(event.target.checked)} className="h-4 w-4 rounded border-slate-300 text-[#0F6B72] focus:ring-[#0F6B72]/30" />I confirm the captured information is ready for clinical review.</label><p className="mt-3 flex items-center gap-1.5 text-[10px] text-slate-400"><CheckCircle2 className="h-3 w-3 text-emerald-500" />Last updated: Oct 24, 15:42 UTC <span className="mx-1">•</span><span className="text-[#0F6B72]">System status: Verified</span></p></section>;
+}

@@ -1,0 +1,5 @@
+import { Info, RefreshCw, ShieldCheck } from 'lucide-react';
+
+export default function ReportNotes() {
+  return <div className="mt-6 grid grid-cols-3 gap-8 border-t border-slate-200 pb-6 pt-5 text-xs text-slate-500"><div><p className="mb-1 flex items-center gap-1.5 font-semibold text-[#0F6B72]"><Info className="h-3.5 w-3.5" />Model Precision Notice</p><p>Utilization reports are calculated using weighted moving averages of active personnel hours against facility baseline capacity. Confidence interval for current period: 98.4%.</p></div><div><p className="mb-1 flex items-center gap-1.5 font-semibold text-slate-600"><ShieldCheck className="h-3.5 w-3.5" />Regulatory Compliance</p><p>This report adheres to HIPAA Section 164.514 requirements for data de-identification and meets the audit trail standards for CMS-certified medical facilities.</p></div><div><p className="mb-1 flex items-center gap-1.5 font-semibold text-slate-600"><RefreshCw className="h-3.5 w-3.5" />Data Latency</p><p>Reports sync in near real-time with floor operations. Minor discrepancies may occur during high-volume intake periods (latency &lt; 45 seconds).</p></div></div>;
+}
