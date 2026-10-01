@@ -1,0 +1,7 @@
+'use client';
+
+import { Calendar, ChevronDown, Search, SlidersHorizontal } from 'lucide-react';
+
+export default function ReportFilters() {
+  return <div className="flex flex-wrap items-center gap-3"><button className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50"><Calendar className="h-3.5 w-3.5 text-slate-400" />Oct 01, 2024 - Oct 24, 2024<ChevronDown className="h-3.5 w-3.5 text-slate-400" /></button><div className="relative min-w-55 max-w-xs flex-1"><Search className="pointer-events-none absolute left-3.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" /><input type="text" placeholder="Search by ID or location..." className="w-full rounded-full border border-slate-200 bg-white py-2 pl-9 pr-3 text-xs text-slate-600 placeholder:text-slate-400 outline-none focus:border-[#0F6B72]" /></div><button className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-slate-600 shadow-sm hover:bg-slate-50"><SlidersHorizontal className="h-3.5 w-3.5 text-slate-400" />Filter Data</button><div className="ml-auto flex items-center gap-4 text-[11px] text-slate-400"><span>Displaying 124 of 1,890 records</span><span className="flex items-center gap-1.5 font-medium text-emerald-600"><span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />Live Sync Active</span></div></div>;
+}

@@ -18,12 +18,13 @@ import {
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'Patients', href: '/patients', icon: Users },
-  { label: 'Intake', href: '/intake', icon: UserPlus },
+  { label: 'Intake', href: '/intake/step-1', icon: UserPlus },
   { label: 'Scheduling', href: '/scheduling', icon: CalendarClock },
   { label: 'Resource Mgmt', href: '/resource-mgmt', icon: Boxes },
   { label: 'Risk Panel', href: '/risk-panel', icon: ShieldAlert },
   { label: 'Disputes', href: '/disputes', icon: MessageSquareWarning },
-  { label: 'Reports', href: '/reports', icon: FileBarChart2 },
+  { label: 'Register Caregiver', href: '/register-caregiver', icon: FileBarChart2 },
+    { label: 'Reports', href: '/reports', icon: FileBarChart2 },
 ];
 
 export default function Sidebar() {
