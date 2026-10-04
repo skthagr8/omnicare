@@ -1,0 +1,34 @@
+import { useRef, useState } from 'react';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, Shield, X } from 'lucide-react';
+import type { useVisitShell } from '@/hooks/useVisitShell';
+
+export default function PatientVisitHeader({ shell }: { shell: ReturnType<typeof useVisitShell> }) {
+	const { care, patient, previous, next } = shell;
+	const summary = useRef<HTMLDialogElement>(null);
+	const [failedPhoto, setFailedPhoto] = useState<string | null>(null);
+	const name = patient?.full_name || care.visit?.clientName || (care.loading ? 'Loading patient...' : 'Patient unavailable');
+	const photo = patient?.photo_url && patient.photo_url !== failedPhoto && /^(https?:\/\/|\/(?!\/))/.test(patient.photo_url) ? patient.photo_url : null;
+	const birth = patient?.date_of_birth ? new Date(`${patient.date_of_birth}T00:00:00`) : null;
+	const validBirth = birth && Number.isFinite(birth.getTime()) && shell.now && birth <= shell.now;
+	const age = validBirth ? shell.now!.getFullYear() - birth!.getFullYear() - (shell.now!.getMonth() < birth!.getMonth() || (shell.now!.getMonth() === birth!.getMonth() && shell.now!.getDate() < birth!.getDate()) ? 1 : 0) : null;
+	const birthLabel = validBirth ? new Intl.DateTimeFormat(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' }).format(birth!) : 'Unavailable';
+	const risk = patient?.fall_risk_level?.toLowerCase();
+	const riskClass = risk === 'high' ? 'bg-[#fbe9e6] text-[#9b4238]' : risk === 'moderate' ? 'bg-[#fff1d6] text-[#926116]' : risk === 'low' ? 'bg-[#eaf2e7] text-[#526d4c]' : 'bg-[#eef0ed] text-[#657269]';
+	const riskLabel = ['high', 'moderate', 'low'].includes(risk || '') ? `${risk} fall risk` : 'Fall risk unavailable';
+	const switchLocked = care.saving || Boolean(care.action) || !care.isOnline || shell.queueLoading;
+	const chevronClass = 'flex size-10 shrink-0 items-center justify-center rounded-full border border-[#dbe4dd] text-[#577568] focus-visible:outline-2 focus-visible:outline-[#287b7c]';
+
+	return <header className="shrink-0 border-b border-[#e4e8e1] bg-[#fffefa] px-5 py-5 sm:px-8">
+		<div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-5">
+			<div className="flex min-w-0 flex-1 items-start gap-3"><div className="flex size-14 shrink-0 items-center justify-center overflow-hidden rounded-full border border-[#dce5dd] bg-[#e8eee5] font-semibold text-[#607967]">{photo ? <img src={photo} alt={`${name}'s profile photo`} referrerPolicy="no-referrer" className="size-full object-cover" onError={() => setFailedPhoto(photo)} /> : <span aria-label="Patient photo unavailable">{name.split(/\s+/).slice(0, 2).map(part => part[0]).join('')}</span>}</div>
+				<div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h1 className="text-xl leading-7 font-bold wrap-anywhere">{name}</h1>{patient?.room && <span className="rounded-full bg-[#e8f3f0] px-2 py-1 text-[10px] font-semibold text-[#287b7c]">Room {patient.room}</span>}<div role="group" aria-label="Patient switcher" className="flex items-center gap-1">{previous && !switchLocked ? <Link href={`/visits/${encodeURIComponent(previous.id)}`} aria-label={`Previous patient: ${previous.client_name}`} title={`Previous patient: ${previous.client_name}`} className={chevronClass}><ChevronLeft aria-hidden="true" className="size-4" /></Link> : <button type="button" aria-label="Previous patient" disabled className={`${chevronClass} opacity-40`}><ChevronLeft aria-hidden="true" className="size-4" /></button>}{next && !switchLocked ? <Link href={`/visits/${encodeURIComponent(next.id)}`} aria-label={`Next patient: ${next.client_name}`} title={`Next patient: ${next.client_name}`} className={chevronClass}><ChevronRight aria-hidden="true" className="size-4" /></Link> : <button type="button" aria-label="Next patient" disabled className={`${chevronClass} opacity-40`}><ChevronRight aria-hidden="true" className="size-4" /></button>}</div>{shell.position && <span className="text-xs text-[#737c77]">{shell.position}</span>}</div>
+					<div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs leading-5 text-[#737c77]"><span>DOB: {birthLabel}{age !== null ? ` (${age}y)` : ''}</span><span className="wrap-anywhere">ID: {patient?.id || care.visit?.client_id || 'Unavailable'}</span><span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold capitalize ${riskClass}`}><Shield aria-hidden="true" className="size-3" />{riskLabel}</span></div><p className="mt-2 text-xs leading-5 wrap-anywhere text-[#737c77]">{patient?.address_text || care.visit?.address || 'Address unavailable'}</p>
+				</div>
+			</div>
+			<div className="flex flex-wrap items-center gap-2"><button type="button" disabled={!patient} onClick={() => summary.current?.showModal()} className="min-h-11 rounded-full border border-[#dbe4dd] px-4 text-xs font-semibold text-[#52635c] focus-visible:outline-2 focus-visible:outline-[#287b7c] disabled:opacity-50">Patient Summary</button>{care.visit?.status === 'scheduled' ? <Link href={`/check-in?session_id=${encodeURIComponent(care.visit.id)}${care.visit.is_demo ? '&demo=1' : ''}`} className="inline-flex min-h-11 items-center rounded-full bg-[#287b7c] px-4 text-xs font-semibold text-white">Confirm Arrival</Link> : care.visit && <span className="px-2 text-xs font-semibold text-[#587360]">{care.visit.status === 'in_progress' ? 'Visit in progress' : care.visit.status === 'completed' ? 'Visit completed' : care.visit.status.replace('_', ' ')}</span>}</div>
+		</div>
+		{shell.patientError && <p role="status" className="mx-auto mt-3 max-w-6xl text-xs text-[#737c77]">{shell.patientError}</p>}
+		<dialog ref={summary} aria-labelledby="patient-summary-title" className="caregiver-login fixed inset-0 m-auto max-h-[85svh] w-[calc(100%-2rem)] max-w-lg overflow-auto rounded-lg border border-[#dbe4dd] bg-[#fffefa] p-6 text-[#303538] backdrop:bg-black/25"><div className="mb-5 flex items-center justify-between gap-4"><h2 id="patient-summary-title" className="text-xl font-semibold">Patient Summary</h2><button type="button" onClick={() => summary.current?.close()} aria-label="Close patient summary" className="flex size-10 items-center justify-center rounded-lg"><X aria-hidden="true" className="size-5" /></button></div><h3 className="text-lg font-bold">{name}</h3><dl className="mt-5 space-y-4 text-sm"><div><dt className="text-xs text-[#737c77]">DOB / age</dt><dd className="mt-1">{birthLabel}{age !== null ? ` / ${age} years` : ''}</dd></div><div><dt className="text-xs text-[#737c77]">Patient ID</dt><dd className="mt-1 wrap-anywhere">{patient?.id}</dd></div><div><dt className="text-xs text-[#737c77]">Room / address</dt><dd className="mt-1 wrap-anywhere">{patient?.room ? `${patient.room} / ` : ''}{patient?.address_text}</dd></div><div><dt className="text-xs text-[#737c77]">Fall risk</dt><dd className="mt-1 capitalize">{riskLabel}</dd></div></dl></dialog>
+	</header>;
+}

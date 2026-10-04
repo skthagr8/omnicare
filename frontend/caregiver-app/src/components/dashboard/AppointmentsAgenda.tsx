@@ -1,0 +1,21 @@
+import { CalendarDays, Clock3, UserRound } from 'lucide-react';
+import type { useAdminDashboard } from '@/hooks/useAdminDashboard';
+import { appointmentStyle, appointmentTime, initials, normalizeCode } from './dashboardStyles';
+
+export default function AppointmentsAgenda({ dashboard: state }: { dashboard: ReturnType<typeof useAdminDashboard> }) {
+	const names = new Map(state.patients.map(patient => [patient.id, patient.full_name]));
+	return <section id="dashboard-appointments" aria-label="Today's appointments" className="flex min-h-0 min-w-0 scroll-mt-32 flex-col border-t border-[#e9edf1] bg-white lg:border-t-0 lg:border-l">
+		<div className="flex min-h-19 items-center justify-between gap-3 border-b border-[#edf0f3] px-5 py-4 sm:px-6"><div className="min-w-0"><h2 className="text-base font-bold">Today&apos;s Appointments</h2><p role="status" className="mt-1 text-xs leading-5 wrap-anywhere text-[#7c8c98]">{state.selectedPatient ? `${state.selectedPatient.full_name} / ${state.visibleSessions.length} appointments` : `${state.visibleSessions.length} appointments shown`}</p></div><button type="button" onClick={state.clearSelection} disabled={!state.selectedPatient} className="min-h-10 shrink-0 rounded px-2 text-xs font-semibold text-[#287b7c] underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-[#287b7c] disabled:text-[#8a98a2]">View All</button></div>
+		<div ref={state.agendaRef} className="min-h-0 overflow-y-auto px-5 py-5 lg:flex-1 sm:px-6">
+			{state.loading && !state.dashboard ? <p role="status" className="py-8 text-sm text-[#637480]">Loading appointments...</p> : state.dashboard?.sessions == null ? <p role="status" className="py-8 text-sm leading-6 text-[#637480]">Today&apos;s appointments are unavailable. Refresh when connected.</p> : state.visibleSessions.length ? <ol aria-label="Daily appointment timeline" className="space-y-5">
+				{state.visibleSessions.map(session => {
+					const status = appointmentStyle(session.status);
+					const code = normalizeCode(session.status);
+					const caregiver = state.caregivers.get(session.caregiver_id);
+					const patientName = names.get(session.client_id) || 'Patient details unavailable';
+					return <li key={session.id} className="relative grid grid-cols-[12px_minmax(0,1fr)] gap-3"><span aria-hidden="true" className="absolute top-5 bottom-[-20px] left-[5px] w-px bg-[#e6edef]" /><span aria-hidden="true" className={`relative z-10 mt-5 size-2.5 rounded-full ring-4 ring-white ${status.dot}`} /><article aria-label={`${patientName}, ${status.label}`} className={`min-w-0 rounded-lg border bg-white px-4 py-4 ${['in_progress', 'in_service'].includes(code) ? 'border-[#d1e7e4] border-l-4 border-l-[#5aa4a0] shadow-[0_3px_12px_rgba(51,117,111,0.05)]' : code === 'missed' ? 'border-[#e9b3af] bg-[#fffafa]' : 'border-[#e6ebef]'}`}><div className="flex flex-wrap items-center justify-between gap-2"><p className="flex items-center gap-1.5 text-xs font-semibold text-[#4f7185]"><Clock3 aria-hidden="true" className="size-3.5 shrink-0" /><time dateTime={session.scheduled_start}>{appointmentTime(session.scheduled_start)}</time><span>-</span><time dateTime={session.scheduled_end}>{appointmentTime(session.scheduled_end)}</time></p><span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${status.chip}`}>{status.label}</span></div><h3 className="mt-3 text-sm leading-6 font-bold wrap-anywhere text-[#29343d]">{patientName}</h3><p className="mt-2 flex items-center gap-2 text-xs leading-5 text-[#637480]"><span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#eaf0f1] text-[9px] font-semibold text-[#627d87]">{caregiver?.full_name ? initials(caregiver.full_name) : <UserRound className="size-3" />}</span><span className="wrap-anywhere">{caregiver?.full_name || 'Caregiver details unavailable'}</span></p></article></li>;
+				})}
+			</ol> : <div role="status" className="py-12 text-center"><CalendarDays aria-hidden="true" className="mx-auto mb-3 size-8 text-[#91a5af]" strokeWidth={1.5} /><p className="text-sm leading-6 text-[#637480]">{state.selectedPatient ? 'No appointments for this patient today.' : 'No appointments match this view.'}</p></div>}
+		</div>
+	</section>;
+}

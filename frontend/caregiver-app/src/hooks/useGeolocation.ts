@@ -6,6 +6,7 @@ interface GeolocationState {
   latitude: number | null;
   longitude: number | null;
   accuracy: number | null;
+  timestamp: number | null;
   error: string | null;
   loading: boolean;
 }
@@ -15,6 +16,7 @@ export function useGeolocation() {
     latitude: null,
     longitude: null,
     accuracy: null,
+    timestamp: null,
     error: null,
     loading: false,
   });
@@ -37,6 +39,7 @@ export function useGeolocation() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
           accuracy: position.coords.accuracy,
+          timestamp: position.timestamp,
           error: null,
           loading: false,
         });
