@@ -1,20 +1,18 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import BottomNav from './BottomNav';
 import Header from './Header';
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isAuthPage = pathname === '/login';
+  const isAuthPage = pathname === '/login' || pathname === '/caregiver-invitation' || pathname === '/complete_profile' || pathname === '/activation-complete';
 
-  if (isAuthPage) return <>{children}</>;
+  const isFullWidthPage = isAuthPage || pathname === '/schedules' || pathname === '/check-in' || pathname === '/check-out' || pathname === '/point-of-care' || pathname === '/visit-summary' || pathname === '/dashboard' || pathname.startsWith('/visits/');
 
   return (
-    <div className="min-h-screen flex flex-col max-w-md mx-auto bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-28 md:pt-18">
       <Header />
-      <main className="flex-1 overflow-y-auto pb-20 px-4 py-4">{children}</main>
-      <BottomNav />
+      <div className={isFullWidthPage ? 'w-full' : 'mx-auto max-w-md px-4 py-4'}>{children}</div>
     </div>
   );
 }

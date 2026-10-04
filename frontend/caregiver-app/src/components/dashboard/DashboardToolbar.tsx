@@ -1,0 +1,14 @@
+import { RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
+import type { useAdminDashboard } from '@/hooks/useAdminDashboard';
+
+export default function DashboardToolbar({ dashboard: state }: { dashboard: ReturnType<typeof useAdminDashboard> }) {
+	return <header className="border-b border-[#e4e9ee] bg-[#f1f5f8] px-5 py-5 sm:px-8">
+		<div className="mx-auto flex max-w-[1600px] flex-wrap items-center justify-between gap-5">
+			<div><p className="mb-1 text-[10px] font-semibold uppercase text-[#6c7d8b]">Daily Operations</p><h1 className="text-2xl leading-8 font-bold text-[#29343d]">Patients &amp; Appointments</h1></div>
+			<div className="flex w-full flex-wrap items-center gap-3 xl:w-auto">
+				<div className="relative min-w-0 flex-1 xl:w-64"><Search aria-hidden="true" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-[#778694]" /><input aria-label="Search patients or caregivers" type="search" value={state.query} onChange={event => state.setQuery(event.target.value)} placeholder="Search patients or caregivers" className="min-h-11 w-full rounded-lg border border-[#d4dee6] bg-white py-2 pr-3 pl-10 text-sm text-[#35434d] outline-none placeholder:text-[#768593] focus:border-[#5e9a9b] focus:ring-2 focus:ring-[#5e9a9b]/15" /></div>
+				<div className="flex min-w-0 flex-wrap items-center gap-3"><SlidersHorizontal aria-hidden="true" className="hidden size-4 text-[#778694] sm:block" /><select aria-label="Filter diagnosis category" value={state.diagnosis} onChange={event => state.setDiagnosis(event.target.value)} className="min-h-11 max-w-full rounded-lg border border-[#d4dee6] bg-white px-3 text-xs text-[#52616d] focus:outline-2 focus:outline-[#5e9a9b]"><option value="all">All diagnoses</option>{state.diagnosisOptions.map(diagnosis => <option key={diagnosis} value={diagnosis}>{diagnosis}</option>)}</select><select aria-label="Filter acuity tier" value={state.acuity} onChange={event => state.setAcuity(event.target.value)} className="min-h-11 rounded-lg border border-[#d4dee6] bg-white px-3 text-xs text-[#52616d] focus:outline-2 focus:outline-[#5e9a9b]"><option value="all">All acuity tiers</option><option value="high">High acuity</option><option value="medium">Medium acuity</option><option value="low">Low acuity</option></select><button type="button" onClick={state.refreshDashboard} disabled={state.loading || !state.isOnline} aria-label="Refresh dashboard" title="Refresh dashboard" className="flex size-11 items-center justify-center rounded-lg border border-[#d4dee6] bg-white text-[#52616d] hover:bg-[#f8fafb] focus-visible:outline-2 focus-visible:outline-[#5e9a9b] disabled:opacity-50"><RefreshCw aria-hidden="true" className={`size-4 ${state.loading ? 'animate-spin motion-reduce:animate-none' : ''}`} /></button></div>
+			</div>
+		</div>
+	</header>;
+}

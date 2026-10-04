@@ -7,7 +7,7 @@ import clsx from 'clsx';
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/visits', label: 'Visits', icon: Calendar },
+  { href: '/schedules', label: 'Schedule', icon: Calendar },
   { href: '/assessments', label: 'Assessments', icon: ClipboardList },
   { href: '/emergency', label: 'Emergency', icon: AlertTriangle, highlight: true },
   { href: '/profile', label: 'Profile', icon: User },
@@ -30,7 +30,7 @@ export default function BottomNav() {
               className={clsx(
                 'flex flex-col items-center justify-center gap-1',
                 item.highlight && 'relative',
-                isActive ? 'text-indigo-600' : 'text-gray-500'
+                isActive ? item.href === '/schedules' ? 'text-[#16776e]' : 'text-indigo-600' : 'text-gray-500'
               )}
             >
               {item.highlight && (

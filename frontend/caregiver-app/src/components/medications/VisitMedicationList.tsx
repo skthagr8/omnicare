@@ -1,0 +1,24 @@
+import Link from 'next/link';
+import { ArrowLeft, RefreshCw, WifiOff } from 'lucide-react';
+import { useVisitMedications, type MedicationFilter, type MedicationSort } from '@/hooks/useVisitMedications';
+import MedicationRow from './MedicationRow';
+import MedicationOutcomeDialog from './MedicationOutcomeDialog';
+import WeeklyMedicationCalendar from './WeeklyMedicationCalendar';
+
+export default function VisitMedicationList({ sessionId }: { sessionId: string }) {
+	const list = useVisitMedications(sessionId);
+	return <main className="caregiver-login min-h-svh bg-[#faf9f7] px-5 py-6 text-[#303538] sm:px-8"><div className="mx-auto max-w-4xl">
+		<Link href={`/visits/${encodeURIComponent(sessionId)}`} className="mb-5 inline-flex min-h-11 items-center gap-2 text-xs font-semibold text-[#287b7c]"><ArrowLeft aria-hidden="true" className="size-4" />Back to patient care</Link>
+		<div className="mb-5 flex flex-wrap items-center justify-between gap-4"><div><h1 className="text-2xl font-bold">Medication</h1><p className="mt-2 text-sm text-[#737c77]">{list.data?.visit.clientName || 'Visit workspace'} / {list.data?.medications.length ?? 0} medications</p></div><button type="button" onClick={() => list.setCalendarOpen(true)} disabled={!list.data || list.loading || list.saving} className="min-h-11 text-xs font-semibold text-[#287b7c] underline underline-offset-4 disabled:opacity-50">View full schedule</button></div>
+		<div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-y border-[#e7e9e3] py-4"><div role="group" aria-label="Filter medication status" className="flex max-w-full flex-wrap gap-1 rounded-lg bg-[#edf2ed] p-1">{([{ value: 'all', label: 'All' }, { value: 'pending', label: 'Pending' }, { value: 'administered', label: 'Administered' }, { value: 'missed', label: 'Missed' }, { value: 'refused', label: 'Refused' }] as { value: MedicationFilter; label: string }[]).map(option => <button key={option.value} type="button" aria-pressed={list.filter === option.value} onClick={() => list.setFilter(option.value)} className={`min-h-10 rounded px-3 text-xs font-semibold focus-visible:outline-2 focus-visible:outline-[#287b7c] ${list.filter === option.value ? 'bg-white text-[#287b7c] shadow-sm' : 'text-[#64716b]'}`}>{option.label}</button>)}</div><div className="flex items-center gap-2"><label htmlFor="medication-sort" className="text-xs text-[#737c77]">Sort by:</label><select id="medication-sort" value={list.sort} onChange={event => list.setSort(event.target.value as MedicationSort)} className="min-h-11 rounded-lg border border-[#cdd8cf] bg-white px-3 text-xs text-[#52635c]"><option value="window">Due soonest</option><option value="name">Drug name</option><option value="status">Status</option></select><button type="button" onClick={list.refreshList} disabled={list.loading || list.saving || !list.isOnline} aria-label="Refresh medication list" title="Refresh medication list" className="flex size-11 items-center justify-center rounded-lg text-[#64716b] disabled:opacity-50"><RefreshCw aria-hidden="true" className="size-4" /></button></div></div>
+		<div role="status" className="mb-3 min-h-6 text-xs text-[#737c77]">{!list.isOnline && <span className="flex items-center gap-2"><WifiOff aria-hidden="true" className="size-3.5" />Offline / Connect to record medication care</span>}</div>
+		{list.loading && <p role="status" className="mb-5 text-sm text-[#737c77]">Loading medications...</p>}{list.error && <p role="alert" className="mb-5 text-sm leading-6 text-[#79523e]">{list.error}</p>}
+		{list.data && !list.data.recordsAvailable && <p role="status" className="mb-5 text-sm leading-6 text-[#737c77]">Administration history is unavailable. Recording is paused to avoid duplicate doses.</p>}
+		{list.data && list.data.visit.status !== 'in_progress' && <p className="mb-5 text-sm text-[#64716b]">This visit is not in progress. Medication records are read-only.</p>}
+		{list.saveError && <p role="alert" className="mb-5 text-sm leading-6 text-[#79523e]">{list.saveError}</p>}<p role="status" aria-live="polite" className="mb-3 text-sm text-[#587360]">{list.announcement}</p>
+		<div className="space-y-5">{list.medications.map(medication => <MedicationRow key={medication.id} medication={medication} record={list.latest.get(medication.id)} recordsAvailable={Boolean(list.data?.recordsAvailable)} disabled={!list.canRecord || list.latest.has(medication.id)} onAction={status => list.openAction(medication, status)} />)}</div>
+		{!list.loading && !list.error && !list.medications.length && <p role="status" className="py-12 text-center text-sm text-[#737c77]">No medications match this view.</p>}
+		<MedicationOutcomeDialog list={list} />
+		{list.calendarOpen && list.data && <WeeklyMedicationCalendar clientId={list.data.visit.client_id} patientName={list.data.visit.clientName} onClose={() => list.setCalendarOpen(false)} isOnline={list.isOnline} />}
+	</div></main>;
+}
