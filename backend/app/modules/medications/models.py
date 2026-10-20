@@ -1,16 +1,16 @@
 import uuid
-from datetime import datetime, time
+from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Optional
-
-from sqlalchemy import Boolean, DateTime, ForeignKey, Numeric, String, Text, Time
+from sqlalchemy import Boolean, Date, DateTime, ForeignKey, Numeric, String, Text, Time
 from sqlalchemy.dialects.postgresql import ARRAY, SMALLINT, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
 from app.core.database import Base
+from app.core.enums import MedicationAdminStatus
 from app.core.db_types import pg_enum
 from app.core.enums import MedicationAdminStatus, MedicationClass
-
+from omnicare.backend.app.modules.clients.models import ClientDiagnosisCategory
+    
 
 class Medication(Base):
     __tablename__ = "medications"
@@ -18,17 +18,18 @@ class Medication(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    client_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("clients.id", ondelete="CASCADE"), nullable=False
-    )
     name: Mapped[str] = mapped_column(String(150), nullable=False)
+    diagnosis_category: Mapped[ClientDiagnosisCategory] = mapped_column(
+        pg_enum(ClientDiagnosisCategory, "client_diagnosis_category"), nullable=False
+    )
     drug_class: Mapped[MedicationClass] = mapped_column(
         pg_enum(MedicationClass, "medication_class"),
         default=MedicationClass.OTHER,
         nullable=False,
     )
     dosage: Mapped[str] = mapped_column(String(100), nullable=False)
-    instructions: Mapped[Optional[str]] = mapped_column(Text)
+    instructions: Mapped[str] = mapped_column(Text)
+    description: Mapped[Optional[str]] = mapped_column(Text)
     requires_glucose_check: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
@@ -65,37 +66,58 @@ class MedicationSchedule(Base):
 
     medication: Mapped[Medication] = relationship(back_populates="schedules")
 
-
 class MedicationAdministration(Base):
+    """Tracks historical logs, refusals, and completions for specific calendar dates."""
+
     __tablename__ = "medication_administrations"
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    session_id: Mapped[uuid.UUID] = mapped_column(
+
+    schedule_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("caregiver_sessions.id", ondelete="CASCADE"),
+        ForeignKey("medication_schedules.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-    medication_id: Mapped[uuid.UUID] = mapped_column(
+    client_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("medications.id", ondelete="RESTRICT"),
+        ForeignKey("clients.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
-    schedule_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("medication_schedules.id", ondelete="SET NULL")
+    caregiver_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("caregivers.user_id", ondelete="SET NULL"),
+        nullable=True,
     )
+
+    # Specific date this dose belongs to on the calendar
+    scheduled_date: Mapped[date] = mapped_column(Date, nullable=False, index=True)
+
+    # Operational Outcome
     status: Mapped[MedicationAdminStatus] = mapped_column(
-        pg_enum(MedicationAdminStatus, "medication_admin_status"), nullable=False
-    )
-    glucose_check_value: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 1))
-    administered_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
-    missed_reason: Mapped[Optional[str]] = mapped_column(Text)
-    recorded_by: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("caregivers.user_id", ondelete="RESTRICT"),
+        pg_enum(MedicationAdminStatus, "medication_admin_status"),
+        default=MedicationAdminStatus.PENDING,
         nullable=False,
     )
-    created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default="now()"
+    administered_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True)
+    )
+    non_completion_reason: Mapped[Optional[str]] = mapped_column(String(255))
+    glucose_level: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2))
+
+    # Relationships
+    schedule: Mapped["MedicationSchedule"] = relationship()
+
+    __table_args__ = (
+        # Ensures only ONE log entry per schedule per client per calendar date
+        Index(
+            "uq_schedule_client_date",
+            "schedule_id",
+            "client_id",
+            "scheduled_date",
+            unique=True,
+        ),
     )
