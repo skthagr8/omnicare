@@ -64,3 +64,11 @@ logs/
 # Coverage
 coverage/
 .nyc_output/
+
+
+# AI
+modules/ai/models/OmniCare_NHATS_LSTM_prospective_model.pt
+modules/ai/models/OmniCare_NHATS_LSTM_prospective_model.md5
+
+# Large datasets (keep out of git; >50 MB)
+backend/app/modules/ai/checkpoints/*.csv
