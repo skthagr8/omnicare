@@ -1,3 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from app.modules.auth.models import User  # noqa: F401
+    
+
 import uuid
 from datetime import datetime
 from typing import Optional
@@ -10,6 +18,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.core.database import Base
 from app.core.db_types import pg_enum
 from app.core.enums import CaregiverStatus, DiagnosisCategory
+
 
 
 class Caregiver(Base):
@@ -28,9 +37,17 @@ class Caregiver(Base):
     last_confirmed_location = mapped_column(Geography(geometry_type="POINT", srid=4326))
     last_confirmed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True))
 
-    user: Mapped["User"] = relationship(back_populates="caregiver")
+    user: Mapped["User"] = relationship(back_populates="caregiver", foreign_keys=[user_id])
     certifications: Mapped[list["CaregiverCertification"]] = relationship(
         back_populates="caregiver", cascade="all, delete-orphan"
+    )
+    registered_by: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+    registered_by_user: Mapped["User"] = relationship(
+     foreign_keys=[registered_by]
     )
 
 
@@ -45,9 +62,12 @@ class CaregiverCertification(Base):
         ForeignKey("caregivers.user_id", ondelete="CASCADE"),
         nullable=False,
     )
+    caregiver = relationship(
+        "Caregiver", 
+        foreign_keys="[CaregiverCertification.caregiver_id]" 
+    )
     diagnosis_category: Mapped[DiagnosisCategory] = mapped_column(
         pg_enum(DiagnosisCategory, "diagnosis_category"), nullable=False
     )
     certified_at: Mapped[datetime] = mapped_column(Date, server_default="CURRENT_DATE")
 
-    caregiver: Mapped[Caregiver] = relationship(back_populates="certifications")

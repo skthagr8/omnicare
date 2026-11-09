@@ -1,4 +1,9 @@
 """Import every module's models so SQLAlchemy can resolve string-based relationships."""
+# app/db/base.py
+from app.core.database import Base  # DeclarativeBase
+
+
+
 import importlib
 import pkgutil
 

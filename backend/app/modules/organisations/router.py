@@ -4,8 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.deps import require_role
 from app.modules.auth.models import User
-from app.modules.organizations.schemas import OrganizationCreate, OrganizationResponse
-from app.modules.organizations.service import OrganizationService
+from app.modules.organisations.schemas import OrganizationCreate, OrganizationResponse
+from app.modules.organisations.service import OrganizationService
 
 router = APIRouter()
 

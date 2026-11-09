@@ -1,7 +1,7 @@
 from typing import Optional
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
-
+import resend
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
@@ -18,12 +18,7 @@ class Settings(BaseSettings):
         default="postgresql+asyncpg://omnicare:omnicare_dev@localhost:5432/omnicare",
         env="DATABASE_URL"
     )
-    
-    # Redis
-    redis_url: str = Field(
-        default="redis://localhost:6379",
-        env="REDIS_URL"
-    )
+
     
     # Security
     secret_key: str = Field(
@@ -66,7 +61,19 @@ class Settings(BaseSettings):
         default=0.75,
         env="EMERGENCY_RISK_THRESHOLD"
     )
-    
+
+    # Email (Resend). The key lives in backend/.env, never in .env.example.
+    resend_api_key: Optional[str] = Field(default=None, env="RESEND_API_KEY")
+    # onboarding@resend.dev is Resend's test sender: it only delivers to the
+    # Resend account owner's address. Use a verified domain for real caregivers.
+    resend_from_email: str = Field(
+        default="OmniCare Onboarding <onboarding@resend.dev>",
+        env="RESEND_FROM_EMAIL"
+    )
+    # Base URL of the caregiver app; invite links point at /caregiver-invitation there.
+    caregiver_app_url: str = Field(default="http://localhost:3002", env="CAREGIVER_APP_URL")
+    caregiver_invitation_ttl_hours: int = Field(default=48, env="CAREGIVER_INVITATION_TTL_HOURS")
+
     # Monitoring
     prometheus_enabled: bool = Field(
         default=True,

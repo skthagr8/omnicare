@@ -19,6 +19,8 @@ from app.modules.auth.models import User
 
 
 class AssessmentService:
+
+    # Maps to router POST /assessments
     @staticmethod
     async def create(db: AsyncSession, actor: User, data: AssessmentCreate) -> Assessment:
         payload = data.model_dump(
@@ -34,7 +36,7 @@ class AssessmentService:
             db.add(CmaiAssessment(assessment_id=assessment.id, **data.cmai.model_dump()))
         elif data.assessment_type == AssessmentType.BRADEN and data.braden:
             db.add(BradenAssessment(assessment_id=assessment.id, **data.braden.model_dump()))
-        elif data.assessment_type == AssessmentType.DELIRIUM_SCREEN and data.delirium:
+        elif data.assessment_type == AssessmentType.DELIRIUM and data.delirium:
             db.add(
                 DeliriumScreening(
                     assessment_id=assessment.id, **data.delirium.model_dump()
@@ -44,6 +46,7 @@ class AssessmentService:
         await db.commit()
         return await AssessmentService.get(db, assessment.id)
 
+    # Maps to router GET /assessments/{assessment_id}
     @staticmethod
     async def get(db: AsyncSession, assessment_id: uuid.UUID) -> Assessment:
         result = await db.execute(
@@ -61,6 +64,7 @@ class AssessmentService:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Assessment not found")
         return assessment
 
+    # Maps to router GET /assessments/client/{client_id}
     @staticmethod
     async def list_for_client(db: AsyncSession, client_id: uuid.UUID) -> list[Assessment]:
         result = await db.execute(
@@ -76,6 +80,7 @@ class AssessmentService:
         )
         return list(result.scalars().all())
 
+    # Maps to router POST /assessments/observations
     @staticmethod
     async def add_observation(
         db: AsyncSession, actor: User, data: ObservationCreate
@@ -85,3 +90,48 @@ class AssessmentService:
         await db.commit()
         await db.refresh(observation)
         return observation
+
+    # Maps to router PUT /assessments/{assessment_id}   
+    @staticmethod
+    async def update_assessment(
+        db: AsyncSession, assessment_id: uuid.UUID, data: AssessmentCreate, actor: User
+    ) -> Assessment:
+        result = await db.execute(
+            select(Assessment)
+            .where(Assessment.id == assessment_id)
+        )
+        assessment = result.scalar_one_or_none()
+        if not assessment:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Assessment not found")
+
+        payload = data.model_dump(
+            exclude={"tug", "cmai", "braden", "delirium"}
+        )
+        for key, value in payload.items():
+            setattr(assessment, key, value)
+
+        await db.commit()
+        return await AssessmentService.get(db, assessment.id)
+
+    # Maps to router PUT /assessments/{assessment_id}
+    @staticmethod
+    async def update_assessment_for_client(
+        db: AsyncSession, client_id: uuid.UUID, data: AssessmentCreate, actor: User
+    ) -> Assessment:
+        result = await db.execute(
+            select(Assessment)
+            .where(Assessment.client_id == client_id)
+            .order_by(Assessment.created_at.desc())
+        )
+        assessment = result.scalar_one_or_none()
+        if not assessment:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Assessment not found")
+
+        payload = data.model_dump(
+            exclude={"tug", "cmai", "braden", "delirium"}
+        )
+        for key, value in payload.items():
+            setattr(assessment, key, value)
+
+        await db.commit()
+        return await AssessmentService.get(db, assessment.id)

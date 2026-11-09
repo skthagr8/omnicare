@@ -29,16 +29,19 @@ def serialize_caregiver(caregiver: Caregiver) -> CaregiverResponse:
 
 class CaregiverService:
     @staticmethod
-    async def list(db: AsyncSession, org_id: uuid.UUID) -> list[Caregiver]:
-        result = await db.execute(
+    async def list(db: AsyncSession, org_id: uuid.UUID | None = None) -> list[Caregiver]:
+        """List caregivers; pass org_id to restrict to one organisation (None = all)."""
+        stmt = (
             select(Caregiver)
             .join(User, User.id == Caregiver.user_id)
             .options(
                 selectinload(Caregiver.user),
                 selectinload(Caregiver.certifications),
             )
-            .where(User.org_id == org_id)
         )
+        if org_id:
+            stmt = stmt.where(User.org_id == org_id)
+        result = await db.execute(stmt)
         return list(result.scalars().all())
 
     @staticmethod

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine
 )
 from sqlalchemy.orm import declarative_base
-from sqlalchemy.pool import NullPool
+
 
 from app.core.config import settings
 
@@ -17,7 +17,6 @@ engine: AsyncEngine = create_async_engine(
     pool_size=20,
     max_overflow=10,
     pool_pre_ping=True,
-    poolclass=NullPool if settings.is_development else None
 )
 
 # Create session factory
