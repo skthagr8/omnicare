@@ -1,9 +1,8 @@
-'use client';
+import type { Metadata } from 'next';
+import { VisitMedicationsRoute } from '../../../../components/medications/Medications';
 
-import { useParams } from 'next/navigation';
-import VisitMedicationList from '@/components/medications/VisitMedicationList';
+export const metadata: Metadata = { title: 'Visit Medication | OmniCare' };
 
 export default function VisitMedicationsPage() {
-	const { sessionID } = useParams<{ sessionID: string }>();
-	return <VisitMedicationList key={sessionID} sessionId={sessionID} />;
+	return <VisitMedicationsRoute />;
 }

@@ -195,7 +195,7 @@ function ModifierCheckboxGroup({
   onChange,
 }: ModifierCheckboxGroupProps) {
   return (
-    <fieldset className="rounded-md border border-slate-200 bg-white p-4">
+    <fieldset className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
       <legend className="px-1 text-sm font-semibold text-slate-800">
         {title}
       </legend>
@@ -381,7 +381,7 @@ export default function IadlPage() {
       {errorMessage && (
         <div
           role="alert"
-          className="mb-5 rounded-md border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"
+          className="mb-5 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800"
         >
           {errorMessage}
         </div>
@@ -390,7 +390,7 @@ export default function IadlPage() {
       {success && (
         <div
           role="status"
-          className="mb-5 rounded-md border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
+          className="mb-5 rounded-xl border border-teal-200 bg-teal-50 p-4 text-sm text-teal-900"
         >
           Assessment saved. ADL: {success.total_adl_score} / 3 (
           {success.adl_dependency_level}); IADL: {success.total_iadl_score} / 5
@@ -411,7 +411,7 @@ export default function IadlPage() {
               Total ADL Score: {adlScore} / 3
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 bg-white px-4">
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 shadow-sm">
             <BinaryRow
               field="bathing"
               label="Bathing"
@@ -450,7 +450,7 @@ export default function IadlPage() {
               Total IADL Score: {iadlScore} / 5
             </p>
           </div>
-          <div className="rounded-md border border-slate-200 bg-white px-4">
+          <div className="rounded-2xl border border-slate-200 bg-white px-4 shadow-sm">
             <BinaryRow
               field="meal_preparation"
               label="Meal Preparation"
@@ -544,7 +544,7 @@ export default function IadlPage() {
                       memory_status: event.target.value as MemoryStatus,
                     }))
                   }
-                  className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+                  className="mt-1 block w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 shadow-sm"
                 >
                   <option value="UNKNOWN">Unknown</option>
                   <option value="GOOD">Good</option>
@@ -585,7 +585,7 @@ export default function IadlPage() {
                       age_category: event.target.value as AgeCategory,
                     }))
                   }
-                  className="mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2"
+                  className="mt-1 block w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 shadow-sm"
                 >
                   <option value="UNKNOWN">Unknown</option>
                   <option value="UNDER_65">Under 65</option>
@@ -611,7 +611,7 @@ export default function IadlPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="shrink-0 rounded-md bg-teal-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-900 disabled:cursor-not-allowed disabled:opacity-60"
+              className="shrink-0 rounded-xl bg-teal-800 px-5 py-2.5 text-sm font-semibold text-white hover:bg-teal-900 disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isSubmitting ? "Saving..." : "Save assessment"}
             </button>

@@ -1,9 +1,8 @@
-'use client';
+import type { Metadata } from 'next';
+import { VisitTasksRoute } from '../../../../components/tasks/Tasks';
 
-import { useParams } from 'next/navigation';
-import VisitTaskList from '@/components/tasks/VisitTaskList';
+export const metadata: Metadata = { title: 'Visit Tasks | OmniCare' };
 
 export default function VisitTasksPage() {
-	const { sessionID } = useParams<{ sessionID: string }>();
-	return <VisitTaskList key={sessionID} sessionId={sessionID} />;
+	return <VisitTasksRoute />;
 }

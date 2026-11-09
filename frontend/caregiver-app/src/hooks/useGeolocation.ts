@@ -22,9 +22,11 @@ export function useGeolocation() {
   });
 
   const getCurrentPosition = useCallback(() => {
+    console.log('[Geolocation] Requesting browser position...');
     setState(prev => ({ ...prev, loading: true, error: null }));
 
     if (!navigator.geolocation) {
+      console.error('[Geolocation] navigator.geolocation NOT supported on this browser/context');
       setState(prev => ({
         ...prev,
         loading: false,
@@ -35,6 +37,11 @@ export function useGeolocation() {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('[Geolocation] Success:', {
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+          accuracy: position.coords.accuracy,
+        });
         setState({
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,

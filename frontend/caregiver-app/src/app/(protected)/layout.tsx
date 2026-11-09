@@ -1,9 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGuard from '../../components/AuthGuard';
+import { AuthGuard } from '../../components/layout/Layout';
 import { apiClient } from '../../services/api';
-
 
 interface UserProfile {
   full_name: string;
