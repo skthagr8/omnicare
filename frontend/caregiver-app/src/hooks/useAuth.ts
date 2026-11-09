@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { apiClient } from '@/services/api';
+import { apiClient } from '../services/api';
 
 interface User {
   id: string;

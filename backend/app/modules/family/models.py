@@ -1,13 +1,16 @@
 import uuid
 from datetime import datetime
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, String, Text
+from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
 
+if TYPE_CHECKING:
+    from app.modules.clients.models import ClientFamilyLink
+    from app.modules.auth.models import User
 
 class FamilyMember(Base):
     __tablename__ = "family_members"
@@ -19,7 +22,7 @@ class FamilyMember(Base):
     )
     relationship_to_client: Mapped[Optional[str]] = mapped_column(String(50))
 
-    user: Mapped["User"] = relationship(back_populates="family_member")
+    user: Mapped["User"] = relationship(back_populates="family_members")
     client_links: Mapped[list["ClientFamilyLink"]] = relationship(
         back_populates="family_member"
     )
@@ -48,7 +51,7 @@ class ServiceRequest(Base):
         UUID(as_uuid=True), ForeignKey("caregiver_sessions.id", ondelete="SET NULL")
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), server_default="now()"
+        DateTime(timezone=True), server_default=func.now()
     )
 
     requested_by_member: Mapped["FamilyMember"] = relationship(

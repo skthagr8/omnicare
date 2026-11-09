@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.modules.organizations.models import Organization
-from app.modules.organizations.schemas import OrganizationCreate
+from app.modules.organisations.models import Organization
+from app.modules.organisations.schemas import OrganizationCreate
 
 
 class OrganizationService:

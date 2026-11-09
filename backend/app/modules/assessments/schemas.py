@@ -13,6 +13,8 @@ class TugScore(BaseModel):
     hesitation_flag: bool = False
     freezing_flag: bool = False
 
+    model_config = {"from_attributes": True}
+
 
 class CmaiScore(BaseModel):
     total_score: Optional[int] = None
@@ -20,16 +22,23 @@ class CmaiScore(BaseModel):
     physical_aggressive: Optional[int] = None
     verbal_agitation: Optional[int] = None
 
+    model_config = {"from_attributes": True}
+
 
 class BradenScore(BaseModel):
     total_score: Optional[int] = None
     skin_inspection_notes: Optional[str] = None
+
+    model_config = {"from_attributes": True}
 
 
 class DeliriumScore(BaseModel):
     cam_positive: Optional[bool] = None
     risk_score: Optional[Decimal] = None
     threshold_breached: bool = False
+
+    # Required so AssessmentResponse can be built from the DeliriumScreening ORM row.
+    model_config = {"from_attributes": True}
 
 
 class AssessmentCreate(BaseModel):

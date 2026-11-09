@@ -93,44 +93,44 @@ export default function CaregiverInvitationPage() {
 	}
 
 	return (
-		<main className="caregiver-login flex min-h-svh items-center justify-center bg-linear-to-br from-[#def3ee] via-[#f1f7ed] to-[#fff8ec] px-5 py-10 text-[#203f3b] sm:px-8 sm:py-16">
+		<main className="caregiver-login flex min-h-svh items-center justify-center bg-linear-to-br from-teal-soft via-teal-soft to-[#fffbeb] px-5 py-10 text-[#115e56] sm:px-8 sm:py-16">
 			<div className="w-full max-w-md pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)]">
 				<div aria-label="OmniCare" className="mb-8 flex items-center justify-center gap-3">
-					<span aria-hidden="true" className="flex size-11 items-center justify-center rounded-2xl bg-[#16776e] text-white shadow-sm">
+					<span aria-hidden="true" className="flex size-11 items-center justify-center rounded-2xl bg-teal text-white shadow-sm">
 						<HeartPulse className="size-6" strokeWidth={1.75} />
 					</span>
-					<span className="text-[30px] leading-none font-bold">OmniCare</span>
+					<span className="text-[30px] leading-none font-semibold">OmniCare</span>
 				</div>
 
-				<section aria-labelledby="invitation-heading" aria-busy={status === 'loading'} className="rounded-lg border border-[#d1e2d9] bg-[#fffefa] px-6 py-8 shadow-[0_12px_40px_rgba(32,63,59,0.07)] sm:px-8 sm:py-10">
+				<section aria-labelledby="invitation-heading" aria-busy={status === 'loading'} className="rounded-2xl border border-teal-soft bg-cream px-6 py-8 shadow-[0_12px_40px_rgba(36,38,43,0.07)] sm:px-8 sm:py-10">
 					<div aria-live="polite" aria-atomic="true">
 						{status === 'loading' ? (
 							<div className="py-8 text-center">
-								<LoaderCircle aria-hidden="true" className="mx-auto mb-5 size-8 animate-spin text-[#16776e] motion-reduce:animate-none" />
+								<LoaderCircle aria-hidden="true" className="mx-auto mb-5 size-8 animate-spin text-teal motion-reduce:animate-none" />
 								<h1 id="invitation-heading" className="text-xl font-semibold">Checking your invitation</h1>
 							</div>
 						) : status === 'valid' && invite ? (
 							<>
-								<ShieldCheck aria-hidden="true" className="mx-auto mb-6 size-10 text-[#16776e]" strokeWidth={1.5} />
+								<ShieldCheck aria-hidden="true" className="mx-auto mb-6 size-10 text-teal" strokeWidth={1.5} />
 								<h1 id="invitation-heading" className="text-center text-2xl leading-9 font-semibold wrap-anywhere">
-									You&apos;ve been invited to join <span className="text-[#16776e]">{invite.organization}</span> on OmniCare
+									You&apos;ve been invited to join <span className="text-teal">{invite.organization}</span> on OmniCare
 								</h1>
 								<div className="mt-8">
 									<label htmlFor="invited-email" className="mb-2.5 block text-sm font-semibold">Your email address</label>
 									<div className="relative">
-										<Mail aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-[#57716b]" />
-										<input id="invited-email" type="email" value={invite.email} readOnly autoComplete="off" className="min-h-16 w-full rounded-2xl border border-[#bdd2c7] bg-[#f1f6ef] py-4 pr-4 pl-12 text-base text-[#203f3b] outline-none focus-visible:ring-2 focus-visible:ring-[#16776e]" />
+										<Mail aria-hidden="true" className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-[#334155]" />
+										<input id="invited-email" type="email" value={invite.email} readOnly autoComplete="off" className="min-h-16 w-full rounded-2xl border border-coral-soft bg-[#f2fbf9] py-4 pr-4 pl-12 text-base text-[#115e56] outline-none focus-visible:ring-2 focus-visible:ring-teal" />
 									</div>
 								</div>
-								<button type="button" onClick={handleContinue} className="mt-8 flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl bg-[#16776e] px-5 py-4 text-lg font-bold text-white shadow-[0_4px_0_#105a53,0_7px_16px_rgba(22,119,110,0.14)] transition-[translate,box-shadow,background-color] duration-150 hover:bg-[#126a62] focus-visible:outline-2 focus-visible:outline-offset-6 focus-visible:outline-[#16776e] active:translate-y-0.5 active:shadow-[0_2px_0_#105a53] motion-reduce:transition-none">
+								<button type="button" onClick={handleContinue} className="mt-8 flex min-h-16 w-full items-center justify-center gap-3 rounded-2xl bg-teal px-5 py-4 text-lg font-semibold text-white shadow-[0_4px_0_#1b8a7f,0_7px_16px_rgba(34,166,153,0.14)] transition-[translate,box-shadow,background-color] duration-150 hover:bg-[#1b8a7f] focus-visible:outline-2 focus-visible:outline-offset-6 focus-visible:outline-teal active:translate-y-0.5 active:shadow-[0_2px_0_#1b8a7f] motion-reduce:transition-none">
 									Continue <ArrowRight aria-hidden="true" className="size-5" />
 								</button>
 							</>
 						) : (
 							<div className="py-3 text-center">
-								<Link2Off aria-hidden="true" className="mx-auto mb-6 size-10 text-[#6b8275]" strokeWidth={1.5} />
+								<Link2Off aria-hidden="true" className="mx-auto mb-6 size-10 text-[#475569]" strokeWidth={1.5} />
 								<h1 id="invitation-heading" className="text-2xl leading-8 font-semibold">{status === 'expired' ? 'Invitation expired' : 'Unable to check your invitation'}</h1>
-								<p className="mt-4 text-base leading-7 text-[#57716b]">{status === 'expired' ? expiredMessage : 'We could not verify this invite link. Please try again later or contact your administrator.'}</p>
+								<p className="mt-4 text-base leading-7 text-[#334155]">{status === 'expired' ? expiredMessage : 'We could not verify this invite link. Please try again later or contact your administrator.'}</p>
 							</div>
 						)}
 					</div>

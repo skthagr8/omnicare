@@ -1,40 +1,54 @@
+import html
+import logging
+from urllib.parse import urlencode
+
 import resend
 
-# Ensure you initialize your API Key from your environment configs
-# Import from env.local.example
-import os
-from dotenv import load_dotenv
-load_dotenv('.env.example')
+from app.core.config import settings
 
-resend.api_key = os.getenv("RESEND_API_KEY")
+logger = logging.getLogger(__name__)
+
+# Key and sender come from backend/.env (see app/core/config.py).
+resend.api_key = settings.resend_api_key
+
 
 async def send_resend_email_task(
-    invitation_id: str, 
-    recipient_email: str, 
-    caregiver_name: str
+    invitation_id: str,
+    recipient_email: str,
+    caregiver_name: str,
+    token: str,
 ):
-    """Fires non-blocking asynchronous email delivery payloads via Resend."""
-    registration_link = f"https://"
-    
+    """Sends the caregiver invitation email via Resend (runs as a background task)."""
+    if not settings.resend_api_key:
+        logger.error("RESEND_API_KEY is not set; invitation %s email not sent.", invitation_id)
+        return
+
+    registration_link = (
+        f"{settings.caregiver_app_url.rstrip('/')}/caregiver-invitation?{urlencode({'token': token})}"
+    )
+    name = html.escape(caregiver_name)
+    hours = settings.caregiver_invitation_ttl_hours
+
     try:
         resend.Emails.send({
-            "from": "Onboarding Team <onboarding@yourverifieddomain.com>",
+            "from": settings.resend_from_email,
             "to": [recipient_email],
             "subject": f"Complete Your Caregiver Registration - {caregiver_name}",
             "html": f"""
-                <h3>Welcome, {caregiver_name}!</h3>
-                <p>You have been formally invited to join our healthcare network.</p>
-                <p>Click below to configure your password and unlock your profile:</p>
+                <h3>Welcome, {name}!</h3>
+                <p>You have been invited to join the OmniCare care team.</p>
+                <p>Click below to set your password and activate your account:</p>
                 <p><a href="{registration_link}">Set Up My Professional Account</a></p>
+                <p style="color:#64748b;font-size:12px">If the button doesn't work, paste this link into your browser:<br/>{registration_link}</p>
                 <br/>
-                <small>This onboarding invite securely expires in 48 hours.</small>
+                <small>This invitation expires in {hours} hours.</small>
             """,
-            # Native headers provide infrastructure-level protection against double-sends
+            # Same id for the same token, so retries don't double-send; a renewed invite gets a new key.
             "headers": {
-                "Idempotency-Key": invitation_id,
-                "X-Entity-Ref-ID": invitation_id
-            }
+                "Idempotency-Key": f"{invitation_id}-{token[:12]}",
+                "X-Entity-Ref-ID": invitation_id,
+            },
         })
+        logger.info("Invitation %s email sent to %s", invitation_id, recipient_email)
     except Exception as e:
-        # Standard warning/logging to ensure api errors don't crash live operations
-        print(f"[RECOVERY LOG] Resend processing failed for invitation {invitation_id}: {str(e)}")
+        logger.error("Resend failed for invitation %s: %s", invitation_id, e)

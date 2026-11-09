@@ -7,6 +7,8 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
+from app.modules.auth.models import User
+
 
 
 class Organization(Base):
@@ -24,6 +26,8 @@ class Organization(Base):
     )
 
     users: Mapped[list["User"]] = relationship(back_populates="organization")
-    administrators: Mapped[list["Administrator"]] = relationship(
-        back_populates="organization"
+    administrators: Mapped[list["User"]] = relationship(
+        "User",
+        primaryjoin="and_(Organization.id == User.org_id, User.role == 'admin')",
+        viewonly=True,
     )

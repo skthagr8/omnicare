@@ -35,6 +35,7 @@ async def list_assessments(
     return await AssessmentService.list_for_client(db, client_id)
 
 
+
 @router.post("/observations", response_model=ObservationResponse, status_code=201)
 async def create_observation(
     data: ObservationCreate,
@@ -42,3 +43,4 @@ async def create_observation(
     current_user: User = Depends(get_current_user),
 ):
     return await AssessmentService.add_observation(db, current_user, data)
+ 

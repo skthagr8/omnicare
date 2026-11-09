@@ -1,9 +1,8 @@
-'use client';
+import type { Metadata } from 'next';
+import { VisitAssessmentsRoute } from '../../../../components/assessments/Assessments';
 
-import { useParams } from 'next/navigation';
-import VisitAssessmentList from '@/components/assessments/VisitAssessmentList';
+export const metadata: Metadata = { title: 'Visit Assessments | OmniCare' };
 
 export default function VisitAssessmentsPage() {
-	const { sessionID } = useParams<{ sessionID: string }>();
-	return <VisitAssessmentList key={sessionID} sessionId={sessionID} />;
+	return <VisitAssessmentsRoute />;
 }
