@@ -1,3 +1,7 @@
+# Import all ORM models to populate SQLAlchemy's registry
+import app.modules.registry  # noqa: F401
+
+
 import asyncio
 from logging.config import fileConfig
 
@@ -7,16 +11,19 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
 
+
 from app.core.config import settings
 from app.core.database import Base
 from app.modules.auth.models import User
 from app.modules.clients.models import Client
 from app.modules.caregivers.models import Caregiver
 from app.modules.family.models import FamilyMember
-from app.modules.scheduling.models import Visit
+from app.modules.scheduling.models import CaregiverSession
 from app.modules.assessments.models import Assessment
-from app.modules.medications.models import Medication, MedicationLog
-from app.modules.emergency.models import EmergencyEvent, EmergencyOutbox
+from app.modules.medications.models import Medication, MedicationAdministration
+import app.modules.organisations.models
+import app.modules.tasks.models
+import app.modules.ai.models
 
 # Alembic Config object
 config = context.config
@@ -31,6 +38,11 @@ if config.config_file_name is not None:
 # Target metadata
 target_metadata = Base.metadata
 
+def include_object(object, name, type_, reflected, compare_to):
+    # Ignore PostGIS internal system tables
+    if type_ == "table" and name in ["spatial_ref_sys", "topology", "layer"]:
+        return False
+    return True
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -39,6 +51,7 @@ def run_migrations_offline() -> None:
         url=url,
         target_metadata=target_metadata,
         literal_binds=True,
+        include_object=include_object,
         dialect_opts={"paramstyle": "named"},
     )
 
