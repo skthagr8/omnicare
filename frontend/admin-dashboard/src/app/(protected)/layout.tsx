@@ -1,9 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGuard from '../../components/AuthGuard';
-import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import Sidebar from '../../components/layout/Sidebar'; 
+import { AuthGuard, DashboardHeader, Sidebar } from '../../components/layout/Layout';
 import { apiClient } from '../../services/api';
 
 
@@ -26,7 +24,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
 
   return (
     <AuthGuard>
-      <div className="flex h-screen bg-slate-100 overflow-hidden">
+      <div className="flex h-screen overflow-hidden bg-cream">
         {/* Left Fixed Sidebar */}
         <Sidebar />
 
@@ -36,7 +34,7 @@ export default function ProtectedLayout({ children }: { children: React.ReactNod
           <DashboardHeader user={user} />
 
           {/* Dynamic page content injected here */}
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-8">
             {children}
           </main>
         </div>
